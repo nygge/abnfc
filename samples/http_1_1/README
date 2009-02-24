@@ -1,0 +1,2 @@
+RFC 2616 uses an older variant of ABNF that is not yet supported by
+ABNFC.

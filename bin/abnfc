@@ -1,0 +1,39 @@
+#!/usr/local/bin/escript
+%% -*- erlang -*-
+
+main(["?"]) ->
+    usage();
+main([File]) ->
+    do_it(File,[]);
+main(Args) ->
+    try	parse_args(Args) of
+	{File, Opts} ->
+	    do_it(File,Opts)
+    catch
+	_:_ ->
+	    usage()
+    end.
+
+do_it(File, Opts) ->
+    ScriptDir = filename:dirname(escript:script_name()),
+    EBIN = filename:join([ScriptDir,"../ebin"]),
+    code:add_patha(EBIN),
+    R = abnfc:file(File, Opts),
+    io:format("~p~n",[R]).
+    
+usage() ->
+    io:format("~s~n",["Usage: abnfc [-o OutDir] [-I InclDir] [-mod Module] File"]).
+
+parse_args(Args) ->
+    parse_args(Args, []).
+
+parse_args(["-o", OutDir|More], Acc) ->
+    parse_args(More, [{o,OutDir}|Acc]);
+parse_args(["-mod",Mod|More], Acc) ->
+    parse_args(More, [{mod,Mod}|Acc]);
+parse_args(["-noobj"|More], Acc) ->
+    parse_args(More, [noobj|Acc]);
+parse_args(["-I",IncludeDir|More], Acc) ->
+    parse_args(More, [{i,IncludeDir}|Acc]);
+parse_args([File], Acc) ->
+    {File, lists:reverse(Acc)}.
