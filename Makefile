@@ -1,7 +1,6 @@
 SUBDIRS=src \
-	samples/abnf \
+	samples/sip
 #	samples/sdp \
-#	samples/sip
 
 include ./subdir.mk
 include ./vsn.mk
