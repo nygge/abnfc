@@ -42,6 +42,7 @@ file(File, Opts) when is_list(Opts) ->
 	    case parse(Text, POpts) of
 		{ok, AST, _Rest} ->
 		    AST1 = abnfc_ast:ast_to_int_form(AST),
+		    io:format("~p~n",[AST1]),
 		    {ok, Code} = abnfc_gen:generate(AST1, GenOpts),
 		    {ok, GenFile} = write_file(Code, GenOpts),
 		    compile_file(GenFile, COpts);
@@ -91,8 +92,10 @@ erlangcode() ->
 scan(Input) ->
     case erl_scan:tokens([], Input, 1) of
 	{done, {ok, Toks, _EndLine}, Extra} ->
-	    Code = toks_to_list(Toks),
-	    {ok, Code, Extra};
+%%	    Code = toks_to_list(Toks),
+%%	    {ok, Code, Extra};
+	    {ok,Abs} = erl_parse:parse_exprs(Toks),
+	    {ok, Abs, Extra};
 	{more, _Cont} ->
 	    throw(end_of_input)
     end.
@@ -139,19 +142,23 @@ read_file1(File) ->
     
 gen_opts(Name, Opts) ->
     Mod = proplists:get_value(mod, Opts, Name),
-    [{mod,Mod}].
+    Type = case proplists:get_bool(binary, Opts) of
+	       true -> binary;
+	       false -> list
+	   end,
+    [{mod,Mod},Type].
 
 compiler_opts(Opts) ->
     OutDir = proplists:get_value(o, Opts, "./"),
     IncludeDirs = [{i,Dir}||Dir <- proplists:get_all_values(i, Opts)],
-    [{outdir,OutDir}|IncludeDirs].
+    [report,{outdir,OutDir}|IncludeDirs].
     
 write_file(Code, Opts) ->
     Name = filename:join(proplists:get_value(o, Opts, "."),
 			 proplists:get_value(mod, Opts))++".erl",
     io:format("abnfc: writing to ~p~n",[Name]),
     file:write_file(Name, Code),
-    erl_tidy:file(Name,[{backups,false}]),
+    erl_tidy:file(Name,[{paper, 95},{backups,false}]),
     {ok,Name}.
 
 compile_file(File, Opts) ->

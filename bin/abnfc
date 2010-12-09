@@ -22,7 +22,7 @@ do_it(File, Opts) ->
     io:format("~p~n",[R]).
     
 usage() ->
-    io:format("~s~n",["Usage: abnfc [-o OutDir] [-I InclDir] [-mod Module] File"]).
+    io:format("~s~n",["Usage: abnfc [-binary] [-noobj] [-o OutDir] [-I InclDir] [-mod Module] File"]).
 
 parse_args(Args) ->
     parse_args(Args, []).
@@ -31,6 +31,8 @@ parse_args(["-o", OutDir|More], Acc) ->
     parse_args(More, [{o,OutDir}|Acc]);
 parse_args(["-mod",Mod|More], Acc) ->
     parse_args(More, [{mod,Mod}|Acc]);
+parse_args(["-binary"|More], Acc) ->
+    parse_args(More, [binary|Acc]);
 parse_args(["-noobj"|More], Acc) ->
     parse_args(More, [noobj|Acc]);
 parse_args(["-I",IncludeDir|More], Acc) ->
