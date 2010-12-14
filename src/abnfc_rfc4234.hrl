@@ -23,9 +23,6 @@ hex_to_int(Ds) ->
 			Acc*16 + Dint
 		end, 0, Ds).
 
-dec_to_int(Ds) ->
-    list_to_integer(Ds).
-
 bin_to_int(Ds) ->
     lists:foldl(fun(D,Acc) ->
 			Dint = D-$0,

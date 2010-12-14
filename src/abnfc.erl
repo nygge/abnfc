@@ -75,7 +75,7 @@ parse(Bin, Opts) when is_binary(Bin) ->
     parse(binary_to_list(Bin), Opts);
 
 parse(String, _Opts) when is_list(String) ->
-    {ok, _Rulelist, []} = abnfc_rfc4234:rulelist_dec(String).
+    {ok, _Rulelist, []} = abnfc_rfc4234:decode(rulelist, String).
 
 %%--------------------------------------------------------------------
 %% @spec () -> list()
