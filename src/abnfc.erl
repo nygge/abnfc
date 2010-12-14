@@ -75,12 +75,7 @@ parse(Bin, Opts) when is_binary(Bin) ->
     parse(binary_to_list(Bin), Opts);
 
 parse(String, _Opts) when is_list(String) ->
-    case catch abnfc_rfc4234:rulelist_dec(String) of
-	{ok, _Rulelist, []} =Result ->
-	    Result;
-	_Error ->
-	    io:format("abnfc: failed~n",[])
-    end.
+    {ok, _Rulelist, []} = abnfc_rfc4234:rulelist_dec(String).
 
 %%--------------------------------------------------------------------
 %% @spec () -> list()
