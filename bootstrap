@@ -1,0 +1,6 @@
+#!/usr/bin/env escript
+
+main([]) ->
+    AbnfcOpts = [noobj, {o, "src"}, {i, "include"}, {i, "src"}],
+    abnfc:file("src/rfc4234_core.abnf", AbnfcOpts),
+    abnfc:file("src/abnfc_rfc4234.abnf", AbnfcOpts).

@@ -1,8 +1,8 @@
 %% -*- erlang -*-
 {application, abnfc,
  [{description,"ABNF parser generator"},
-  {vsn,"%VSN%"},
-  {modules,[%MODULES%]},
+  {vsn,"0.3"},
+  {modules, "MODULES"},
   {applications,[kernel,stdlib]},
   {registered,[]},
   {env,[]}

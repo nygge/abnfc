@@ -13,4 +13,4 @@ all clean:
 
 docs:
 	erl -noshell -pa $(BINDIR) -run edoc_run application \
-            "'$(APPNAME)'" '"."' '$(DOC_OPTS)' -s init stop
+            "'$(APPNAME)'" '"."' -s init stop
