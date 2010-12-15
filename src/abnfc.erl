@@ -48,7 +48,7 @@ file(File, Opts) when is_list(Opts) ->
 		    end,
 		    {ok, Code} = abnfc_gen:generate(AST1, GenOpts),
 		    {ok, GenFile} = write_file(Code, GenOpts),
-		    compile_file(GenFile, COpts, Opts);
+		    compile_file(GenFile, COpts, proplists:get_bool(noobj,Opts));
 		Error ->
 		    Error
 	    end;
