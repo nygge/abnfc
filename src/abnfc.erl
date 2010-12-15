@@ -45,7 +45,7 @@ file(File, Opts) when is_list(Opts) ->
 		    io:format("~p~n",[AST1]),
 		    {ok, Code} = abnfc_gen:generate(AST1, GenOpts),
 		    {ok, GenFile} = write_file(Code, GenOpts),
-		    compile_file(GenFile, COpts);
+		    compile_file(GenFile, COpts, proplists:get_bool(noobj,Opts));
 		Error ->
 		    Error
 	    end;
@@ -161,7 +161,8 @@ write_file(Code, Opts) ->
     erl_tidy:file(Name,[{paper, 95},{backups,false}]),
     {ok,Name}.
 
-compile_file(File, Opts) ->
+compile_file(File, Opts, false=_Noobj) ->
     io:format("abnfc: compiling ~p opts = ~p~n",[File, Opts]),
-    compile:file(File, Opts).
-
+    compile:file(File, Opts);
+compile_file(_File, _Opts, true=_Noobj) ->
+    ok.
