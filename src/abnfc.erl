@@ -42,10 +42,13 @@ file(File, Opts) when is_list(Opts) ->
 	    case parse(Text, POpts) of
 		{ok, AST, _Rest} ->
 		    AST1 = abnfc_ast:ast_to_int_form(AST),
-		    io:format("~p~n",[AST1]),
+		    case proplists:get_bool(verbose,Opts) of
+			true -> io:format("~p~n",[AST1]);
+			false -> ok
+		    end,
 		    {ok, Code} = abnfc_gen:generate(AST1, GenOpts),
 		    {ok, GenFile} = write_file(Code, GenOpts),
-		    compile_file(GenFile, COpts, proplists:get_bool(noobj,Opts));
+		    compile_file(GenFile, COpts, Opts);
 		Error ->
 		    Error
 	    end;
@@ -146,7 +149,8 @@ gen_opts(Name, Opts) ->
 	       true -> binary;
 	       false -> list
 	   end,
-    [{mod,Mod},Type].
+    Verbose = proplists:get_bool(verbose,Opts),
+    [{mod,Mod},{verbose,Verbose},Type].
 
 compiler_opts(Opts) ->
     OutDir = proplists:get_value(o, Opts, "./"),
@@ -156,13 +160,21 @@ compiler_opts(Opts) ->
 write_file(Code, Opts) ->
     Name = filename:join(proplists:get_value(o, Opts, "."),
 			 proplists:get_value(mod, Opts))++".erl",
-    io:format("abnfc: writing to ~p~n",[Name]),
+    
+    maybe_write("abnfc: writing to ~p~n",[Name],Opts),
     file:write_file(Name, Code),
     erl_tidy:file(Name,[{paper, 95},{backups,false}]),
     {ok,Name}.
 
-compile_file(File, Opts, false=_Noobj) ->
-    io:format("abnfc: compiling ~p opts = ~p~n",[File, Opts]),
-    compile:file(File, Opts);
-compile_file(_File, _Opts, true=_Noobj) ->
-    ok.
+compile_file(File, COpts, MyOpts) ->
+    maybe_write("abnfc: compiling ~p opts = ~p~n",[File, COpts],MyOpts),
+    case proplists:get_bool(noobj,MyOpts) of
+	true -> ok;
+	false -> compile:file(File, COpts)
+    end.
+
+maybe_write(Fmt,Args,Opts) ->
+    case proplists:get_bool(verbose,Opts) of
+	true -> io:format(Fmt,Args);
+	false -> ok
+    end.

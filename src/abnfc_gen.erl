@@ -51,7 +51,8 @@
 %% @end
 %%--------------------------------------------------------------------
 generate(AST, Opts) ->
-    io:format("Opts ~p~n",[Opts]),
+    Verbose = proplists:get_bool(verbose,Opts),
+    maybe_write("Opts ~p~n",[Opts],Verbose),
     Module = proplists:get_value(mod,Opts),
     Type = case proplists:get_bool(binary, Opts) of
 	       true -> binary;
@@ -63,7 +64,7 @@ generate(AST, Opts) ->
 		   exports(Names),
 		   attribute(atom(include),[string(lists:concat([Module,".hrl"]))]),
 		   gen_dec(Names),
-		   form_list([form_list([gen_rule(R, Type)]) || R <- AST]),
+		   form_list([form_list([gen_rule(R, Type, Verbose)]) || R <- AST]),
 		   mk__alt(),
 		   mk__repeat(),
 		   mk__seq(),
@@ -92,13 +93,13 @@ gen_dec(Names) ->
 	     [clause([atom(Name),variable('Str')],[],
 		     [application(application(atom(Name),[]),[variable('Str')])])||Name<-Names]).
 
-gen_rule(#rule{name=Name, body=Element, code=nocode}, Type) ->
-    io:format("abnfc_gen: generating rule ~p~n",[Name]),
+gen_rule(#rule{name=Name, body=Element, code=nocode}, Type, Verbose) ->
+    maybe_write("abnfc_gen: generating rule ~p~n",[Name],Verbose),
     Body = gen_elem(Element, Type),
     mk_rule_fun(Name, Body);
 
-gen_rule(#rule{name=Name, body=Element, code=Code}, Type) ->
-    io:format("abnfc_gen: generating rule ~p~n",[Name]),
+gen_rule(#rule{name=Name, body=Element, code=Code}, Type, Verbose) ->
+    maybe_write("abnfc_gen: generating rule ~p~n",[Name],Verbose),
     Vars = gen_vars(Element),
     Body = gen_elem(Element, Type),
     mk_rule_fun(Name, Body, Vars, Code).
@@ -391,3 +392,7 @@ mk__seq() ->
 				[tuple([atom(ok),list([]),variable('T')])])])
 		     ])]).
 
+maybe_write(Fmt,Args,true) ->
+    io:format(Fmt,Args);
+maybe_write(_Fmt,_Args,false) ->
+    ok.
