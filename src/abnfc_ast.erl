@@ -63,7 +63,6 @@ char_alts([], {[], Others}) ->
 char_alts([], {Chars, Others}) ->
     As=lists:sort(Chars),
     Merged=merge_alts(As),
-    io:format("char_alts ~p~n~p~n",[As, Merged]),
     [#char_alt{alts=Merged}|Others].
 
 
