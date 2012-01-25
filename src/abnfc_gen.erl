@@ -66,8 +66,10 @@ generate(AST, Opts) ->
 		   gen_dec(Names),
 		   form_list([form_list([gen_rule(R, Type, Verbose)]) || R <- AST]),
 		   mk__alt(),
+		   mk__do_alt(),
 		   mk__repeat(),
 		   mk__seq(),
+		   mk__do_seq(),
 		   eof_marker()]),
     {ok, erl_prettypr:format(Res)}.
 
@@ -104,15 +106,17 @@ gen_rule(#rule{name=Name, body=Element, code=Code}, Type, Verbose) ->
     Body = gen_elem(Element, Type),
     mk_rule_fun(Name, Body, Vars, Code).
 
+mk_rule_fun(Name, {tree, fun_expr, _, _}=Body) ->
+    function(
+      atom(Name),
+      [clause([],[],
+	      [Body])]);
+
 mk_rule_fun(Name, Body) ->
     function(
       atom(Name),
       [clause([],[],
-	      [fun_expr([clause([variable('T')],
-	      			[],
-				[match_expr(variable('__P'),Body),
-				 application(variable('__P'),
-					     [variable('T')])])])])]).
+	      [Body])]).
 
 mk_rule_fun(Name, Body, Vars, Code) -> 
     function(
@@ -264,40 +268,45 @@ disjunction([As]) ->
 mk__alt() ->
     function(atom('__alt'),
 	     [clause(
-		[list([variable('P')],variable('Ps'))],
+		[variable('Ps')],
 		[],
 		[fun_expr(
 		   [clause(
 		      [variable('T')],
 		      [],
-		      [case_expr(
-			 application(variable('P'),[variable('T')]),
-			 [clause([match_expr(tuple([atom(ok),variable('_R'),variable('_T1')]),
-					     variable('Res'))],[],
-				 [variable('Res')]),
-			  clause([atom(fail)],[],
-				 [case_expr(
-				    variable('Ps'),
-				    [clause([nil()], [], [atom(fail)]),
-				     clause([variable('_')],[],
-					    [application(
-					       application(atom('__alt'), [variable('Ps')]),
-					       [variable('T')])
-					    ]
-					   )]
-				   )]
-				)]
-			)]
+		      [application(atom('__do_alt'), [variable('Ps'),variable('T')])]
 		     )]
 		  )]
 	       )]
+	    ).
+
+mk__do_alt() ->
+    function(atom('__do_alt'),
+	     [clause(
+		[list([variable('P')],variable('Ps')),variable('T')],
+		[],
+		[
+		 case_expr(
+		   application(variable('P'),[variable('T')]),
+		   [clause([match_expr(tuple([atom(ok),variable('_R'),variable('_T1')]),
+				       variable('Res'))],[],
+			   [variable('Res')]),
+		    clause([atom(fail)],[],
+			   [application(atom('__do_alt'), [variable('Ps'),variable('T')])
+			   ]
+			  )]
+		  )]
+	       ),
+	      clause([nil(),variable('_')],[],[atom(fail)])
+	     ]
 	    ).
 
 
 %% Match between Min and Max repetitions of parser P
 mk__repeat() ->
     form_list([mk__repeat_3(),
-	       mk__repeat_4()]).
+	       mk__repeat_4(),
+	       mk__do_repeat()]).
 
 mk__repeat_3() ->
     function(atom('__repeat'),
@@ -310,7 +319,7 @@ mk__repeat_3() ->
 			      variable('P'),
 			      integer(0)])])]).
 
-mk__repeat_4() ->   
+mk__repeat_4() ->
     function(atom('__repeat'),
 	     [clause(
 		[variable('Min'),variable('Max'),variable('P'), variable('Found')],
@@ -319,78 +328,105 @@ mk__repeat_4() ->
 		   [clause(
 		      [variable('T')],
 		      [],
-		      [case_expr(
-			 application(variable('P'),[variable('T')]),
-			 [clause([tuple([atom(ok),variable('R1'),variable('T1')])],
-				 [infix_expr(variable('Max'),operator('=='),
-					     infix_expr(variable('Found'),operator('+'),
-							integer(1)))],
-				 [tuple([atom(ok),list([variable('R1')]),variable('T1')])]),
-			  clause([tuple([atom(ok),variable('R1'),variable('T1')])],
-				 [],
-				 [
-				  case_expr(application(
-					      application(atom('__repeat'),
-							  [variable('Min'),
-							   variable('Max'),
-							   variable('P'),
-							   infix_expr(variable('Found'),
-								      operator('+'),
-								      integer(1))]),
-					      [variable('T1')]),
-					    [clause([tuple([atom(ok),variable('R2'),
-							    variable('T2')])],
-						    [],
-						    [tuple([atom(ok),
-							    list([variable('R1')],variable('R2')),
-							    variable('T2')])]),
-					     clause([atom(fail)],
-						    [infix_expr(variable('Found'),
-								operator('>='),
-								variable('Min'))],
-						    [tuple([atom(ok),list([variable('R1')]),
-							    variable('T1')])]),
-					     clause([atom(fail)],
-						    [],[atom(fail)])
-					    ])]),
-			  clause([atom(fail)],
-				 [infix_expr(variable('Found'),operator('>='),variable('Min'))],
-				 [tuple([atom(ok),nil(),variable('T')])]),
-			  clause([atom(fail)],
-				 [],[atom(fail)])
-			 ])])])])]).
+		      [application(atom('__do_repeat'), [variable('Min'),
+							 variable('Max'),
+							 variable('P'),
+							 variable('Found'),
+							 variable('T')])]
+		     )]
+		  )]
+	       )]
+	    ).
+
+
+mk__do_repeat() ->   
+    function(atom('__do_repeat'),
+	     [clause(
+		[variable('Min'),variable('Max'),variable('P'), variable('Found'),variable('T')],
+		[],
+		[case_expr(
+		   application(variable('P'),[variable('T')]),
+		   [
+		    clause([tuple([atom(ok),variable('R1'),variable('T1')])],
+			   [infix_expr(variable('Max'),operator('=='),
+				       infix_expr(variable('Found'),operator('+'),
+						  integer(1)))],
+			   [tuple([atom(ok),list([variable('R1')]),variable('T1')])]),
+		    clause([tuple([atom(ok),variable('R1'),variable('T1')])],
+			   [],
+			   [
+			    case_expr(application(atom('__do_repeat'),
+						  [variable('Min'),
+						   variable('Max'),
+						   variable('P'),
+						   infix_expr(variable('Found'),
+							      operator('+'),
+							      integer(1)),
+						   variable('T1')]),
+				      [clause([tuple([atom(ok),variable('R2'),
+						      variable('T2')])],
+					      [],
+					      [tuple([atom(ok),
+						      list([variable('R1')],variable('R2')),
+						      variable('T2')])]),
+				       clause([atom(fail)],
+					      [infix_expr(variable('Found'),
+							  operator('>='),
+							  variable('Min'))],
+					      [tuple([atom(ok),list([variable('R1')]),
+						      variable('T1')])]),
+				       clause([atom(fail)],
+					      [],[atom(fail)])
+				      ])]),
+		    clause([atom(fail)],
+			   [infix_expr(variable('Found'),operator('>='),variable('Min'))],
+			   [tuple([atom(ok),nil(),variable('T')])]),
+		    clause([atom(fail)],
+			   [],[atom(fail)])
+		   ])
+		])]).
 
 %% Match a sequence of parsers.
 mk__seq() ->
     function(atom('__seq'),
 	     [clause(
-		[list([variable('P')],variable('Ps'))],
+		[variable('Ps')],
 		[],
 		[fun_expr(
 		   [clause(
 		      [variable('T')],
 		      [],
-		      [case_expr(
-			 application(variable('P'),[variable('T')]),
-			 [clause([tuple([atom(ok),variable('R1'),variable('T1')])],
-				 [],
-				 [
-				  case_expr(
-				    application(
-				      application(atom('__seq'),[variable('Ps')]),
-				      [variable('T1')]),
-				    [clause([tuple([atom(ok),variable('R2'),variable('T2')])],
-					    [],
-					    [tuple([atom(ok),list([variable('R1')],
-								  variable('R2')),
-						    variable('T2')])]),
-				     clause([atom(fail)],[],[atom(fail)])])]),
-			  clause([atom(fail)],[],[atom(fail)])])])])]),
-	      clause([nil()],[],
-		     [fun_expr(
-			[clause([variable('T')],[],
-				[tuple([atom(ok),list([]),variable('T')])])])
-		     ])]).
+		      [application(atom('__do_seq'), [variable('Ps'),variable('T')])]
+		     )]
+		  )]
+	       )]
+	    ).
+
+
+
+mk__do_seq() ->
+    function(atom('__do_seq'),
+	     [clause(
+		[list([variable('P')],variable('Ps')),variable('T')],
+		[],
+		[
+
+		 case_expr(
+		   application(variable('P'),[variable('T')]),
+		   [clause([tuple([atom(ok),variable('R1'),variable('T1')])],
+			   [],
+			   [
+			    case_expr(
+			      application(atom('__do_seq'),[variable('Ps'),variable('T1')]),
+			      [clause([tuple([atom(ok),variable('R2'),variable('T2')])],
+				      [],
+				      [tuple([atom(ok),list([variable('R1')],
+							    variable('R2')),
+					      variable('T2')])]),
+			       clause([atom(fail)],[],[atom(fail)])])]),
+		    clause([atom(fail)],[],[atom(fail)])])]),
+	      clause([nil(),variable('T')],[],
+		     [tuple([atom(ok),list([]),variable('T')])])]).
 
 maybe_write(Fmt,Args,true) ->
     io:format(Fmt,Args);
