@@ -61,13 +61,19 @@ char_alts([Alt|Alts], {Chars,Others}) ->
 char_alts([], {[], Others}) ->
     Others;
 char_alts([], {Chars, Others}) ->
-    As=lists:sort(Chars),
-    Merged=merge_alts(As),
+    Merged = merge_alts(Chars),
     [#char_alt{alts=Merged}|Others].
 
+cmp_chars(#char_val{value=V},#char_range{from=F,to=_T}) when V =< F ->
+    true;
+cmp_chars(#char_range{from=_F,to=T},#char_val{value=V}) when T =< V->
+    true;
+cmp_chars(X,Y) ->
+    X =< Y.
 
-merge_alts([A|As]) ->
-    lists:reverse(lists:foldl(fun merge_alts/2, [A], As)).
+merge_alts(Chars) ->
+    [A|As]=lists:sort(fun cmp_chars/2, Chars),
+    sort_alts(lists:foldl(fun merge_alts/2, [A], As)).
 
 merge_alts(#char_val{value=V}, [#char_val{value=Prev}|Acc]) when V==Prev+1 ->
     [#char_range{from=Prev,to=V}|Acc];
@@ -86,6 +92,14 @@ merge_alts(#char_range{from=F1,to=T1}, [#char_range{from=From,to=To}|Acc]) when 
     [#char_range{from=From,to=T1}|Acc];
 merge_alts(#char_range{}=N, [#char_range{}|_]=Acc) ->
     [N|Acc].
+
+sort_alts(Alts) ->
+    lists:reverse([A||{_,A} <- lists:keysort(1,[{range_size(A),A}||A<-Alts])]).
+
+range_size(#char_range{from=F,to=T}) ->
+    T-F+1;
+range_size(#char_val{}) ->
+    1.
 
 %%====================================================================
 %% Test functions
