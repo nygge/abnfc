@@ -90,8 +90,6 @@ erlangcode() ->
 scan(Input) ->
     case erl_scan:tokens([], Input, 1) of
 	{done, {ok, Toks, _EndLine}, Extra} ->
-%%	    Code = toks_to_list(Toks),
-%%	    {ok, Code, Extra};
 	    {ok,Abs} = erl_parse:parse_exprs(Toks),
 	    {ok, Abs, Extra};
 	{more, _Cont} ->
