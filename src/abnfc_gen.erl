@@ -129,20 +129,49 @@ mk_rule_fun(Name, Body, Vars, Code) ->
 				   application(variable('__P'),[variable('T')]),
 				   [clause([tuple([atom(ok),Vars,variable('_T1')])],
 					   [],
-					   [try_expr(Code,
-						     [clause([variable('__Ret')],[],
-							     [tuple([atom(ok), variable('__Ret'),
-								     variable('_T1')])])],
-						     %% Handlers
-						     [clause([class_qualifier(atom(throw),
-									      atom(fail))],
-							     [],
-							     [atom(fail)])
-						     ]
-						    )]
+					   [case is_safe(Code, Vars) of
+						true ->
+						    tuple([atom(ok), hd(Code), variable('_T1')]);
+						false ->
+						    try_expr(Code,
+							     [clause([variable('__Ret')],[],
+								     [tuple([atom(ok), variable('__Ret'),
+									     variable('_T1')])])],
+							     %% Handlers
+							     [clause([class_qualifier(atom(throw),
+										      atom(fail))],
+								     [],
+								     [atom(fail)])
+							     ]
+							    )
+					    end]
 					  ),
 				    clause([atom(fail)],[],[atom(fail)])])])])])]).
-					   
+
+is_safe(L, Vars) when is_list(L) ->
+    lists:all(fun (T) ->
+		      is_safe(T, Vars)
+	      end, L);
+is_safe({atom,_,_Val}, _Vars) ->
+    true;
+is_safe({char,_,_Val}, _Vars) ->
+    true;
+is_safe({cons,_,Hd,Tl}, Vars) ->
+    is_safe(Hd, Vars) and is_safe(Tl, Vars);
+is_safe({float,_,_Val}, _Vars) ->
+    true;
+is_safe({integer,_,_Val}, _Vars) ->
+    true;
+is_safe({nil,_}, _Vars) ->
+    true;
+is_safe({tuple,_,Es}, Vars) ->
+    is_safe(Es, Vars);
+is_safe({var,_,Var}, Vars) ->
+    true; %lists:member(Var,Vars);
+is_safe(_, _Vars) ->
+    false.
+
+    
 gen_elem(#seq{elements=Elements}, Type) ->
     Body = [gen_elem(Element, Type)||Element <- Elements],
     application(atom('__seq'),[list(Body)]);
