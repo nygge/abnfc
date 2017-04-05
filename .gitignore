@@ -1,3 +1,5 @@
+.\#*
+\#*
 *~
-*.beam
-ebin
+/_build/
+/rebar.lock

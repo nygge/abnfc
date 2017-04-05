@@ -5,11 +5,11 @@
 -module(abnfc_rfc4234).
 
 -export([alternation/0, 'bin-val'/0, 'c-nl'/0,
-	 'c-wsp'/0, 'char-val'/0, comment/0, concatenation/0,
-	 'dec-val'/0, decode/2, 'defined-as'/0, element/0,
-	 elements/0, group/0, 'hex-val'/0, 'num-val'/0, option/0,
-	 'prose-val'/0, repeat/0, repetition/0, rule/0,
-	 rulelist/0, rulename/0]).
+         'c-wsp'/0, 'char-val'/0, comment/0, concatenation/0,
+         'dec-val'/0, decode/2, 'defined-as'/0, element/0,
+         elements/0, group/0, 'hex-val'/0, 'num-val'/0, option/0,
+         'prose-val'/0, repeat/0, repetition/0, rule/0,
+         rulelist/0, rulename/0]).
 
 -include("abnfc_rfc4234.hrl").
 
@@ -37,472 +37,472 @@ decode('prose-val', Str) -> ('prose-val'())(Str).
 
 rulelist() ->
     fun (T) ->
-	    __P = '__repeat'(1, infinity,
-			     '__alt'([rule(),
-				      '__seq'(['__repeat'(0, infinity, 'c-wsp'()),
-					       'c-nl'()])])),
-	    case __P(T) of
-	      {ok, _YY, _T1} ->
-		  try #rulelist{rules =
-				    [Rule || Rule <- _YY, is_tuple(Rule)]}
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__repeat'(1, infinity,
+                             '__alt'([rule(),
+                                      '__seq'(['__repeat'(0, infinity, 'c-wsp'()),
+                                               'c-nl'()])])),
+            case __P(T) of
+              {ok, _YY, _T1} ->
+                  try #rulelist{rules =
+                                    [Rule || Rule <- _YY, is_tuple(Rule)]}
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 rule() ->
     fun (T) ->
-	    __P = '__seq'([rulename(), 'defined-as'(), elements(),
-			   '__repeat'(0, 1,
-				      '__seq'(['__repeat'(0, infinity, 'WSP'()),
-					       fun ([58 | Tl]) -> {ok, 58, Tl};
-						   (_) -> fail
-					       end,
-					       '__repeat'(0, infinity, 'WSP'()),
-					       erlangcode()])),
-			   'c-nl'()]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3, _YY4, _YY5] = _YY, _T1} ->
-		  try #rule{type = _YY2, name = element(2, _YY1),
-			    body = _YY3,
-			    code =
-				case _YY4 of
-				  [[_, _, _, Code]] -> Code;
-				  [] -> nocode
-				end}
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([rulename(), 'defined-as'(), elements(),
+                           '__repeat'(0, 1,
+                                      '__seq'(['__repeat'(0, infinity, 'WSP'()),
+                                               fun ([58 | Tl]) -> {ok, 58, Tl};
+                                                   (_) -> fail
+                                               end,
+                                               '__repeat'(0, infinity, 'WSP'()),
+                                               erlangcode()])),
+                           'c-nl'()]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3, _YY4, _YY5] = _YY, _T1} ->
+                  try #rule{type = _YY2, name = element(2, _YY1),
+                            body = _YY3,
+                            code =
+                                case _YY4 of
+                                  [[_, _, _, Code]] -> Code;
+                                  [] -> nocode
+                                end}
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 rulename() ->
     fun (T) ->
-	    __P = '__seq'(['ALPHA'(),
-			   '__repeat'(0, infinity,
-				      '__alt'([fun ([C | Tl]) when C == 45 -> {ok, C, Tl};
-						   (_) -> fail
-					       end,
-					       'ALPHA'(), 'DIGIT'()]))]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2] = _YY, _T1} ->
-		  try #rulename{name = list_to_atom(lists:flatten(_YY))}
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'(['ALPHA'(),
+                           '__repeat'(0, infinity,
+                                      '__alt'([fun ([C | Tl]) when C == 45 -> {ok, C, Tl};
+                                                   (_) -> fail
+                                               end,
+                                               'ALPHA'(), 'DIGIT'()]))]),
+            case __P(T) of
+              {ok, [_YY1, _YY2] = _YY, _T1} ->
+                  try #rulename{name = list_to_atom(lists:flatten(_YY))}
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 'defined-as'() ->
     fun (T) ->
-	    __P = '__seq'(['__repeat'(0, infinity, 'c-wsp'()),
-			   '__alt'([fun ([C | Tl]) when C == 61 -> {ok, C, Tl};
-					(_) -> fail
-				    end,
-				    fun ([C1, C2 | Tl]) when C1 == 61, C2 == 47 ->
-					    {ok, [C1, C2], Tl};
-					(_) -> fail
-				    end]),
-			   '__repeat'(0, infinity, 'c-wsp'())]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  try case _YY2 of
-			$= -> def_rule;
-			_ -> app_rule
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'(['__repeat'(0, infinity, 'c-wsp'()),
+                           '__alt'([fun ([C | Tl]) when C == 61 -> {ok, C, Tl};
+                                        (_) -> fail
+                                    end,
+                                    fun ([C1, C2 | Tl]) when C1 == 61, C2 == 47 ->
+                                            {ok, [C1, C2], Tl};
+                                        (_) -> fail
+                                    end]),
+                           '__repeat'(0, infinity, 'c-wsp'())]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  try case _YY2 of
+                        $= -> def_rule;
+                        _ -> app_rule
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 elements() ->
     fun (T) ->
-	    __P = '__seq'([alternation(),
-			   '__repeat'(0, infinity, 'c-wsp'())]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2] = _YY, _T1} -> {ok, _YY1, _T1};
-	      fail -> fail
-	    end
+            __P = '__seq'([alternation(),
+                           '__repeat'(0, infinity, 'c-wsp'())]),
+            case __P(T) of
+              {ok, [_YY1, _YY2] = _YY, _T1} -> {ok, _YY1, _T1};
+              fail -> fail
+            end
     end.
 
 'c-wsp'() ->
     fun (T) ->
-	    __P = '__alt'(['WSP'(), '__seq'(['c-nl'(), 'WSP'()])]),
-	    case __P(T) of
-	      {ok, _YY, _T1} -> {ok, 'c-wsp', _T1};
-	      fail -> fail
-	    end
+            __P = '__alt'(['WSP'(), '__seq'(['c-nl'(), 'WSP'()])]),
+            case __P(T) of
+              {ok, _YY, _T1} -> {ok, 'c-wsp', _T1};
+              fail -> fail
+            end
     end.
 
 'c-nl'() ->
     fun (T) ->
-	    __P = '__alt'([comment(), 'CRLF'()]),
-	    case __P(T) of
-	      {ok, _YY, _T1} -> {ok, 'c-nl', _T1};
-	      fail -> fail
-	    end
+            __P = '__alt'([comment(), 'CRLF'()]),
+            case __P(T) of
+              {ok, _YY, _T1} -> {ok, 'c-nl', _T1};
+              fail -> fail
+            end
     end.
 
 comment() ->
     fun (T) ->
-	    __P = '__seq'([fun ([59 | Tl]) -> {ok, 59, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(0, infinity, '__alt'(['WSP'(), 'VCHAR'()])),
-			   'CRLF'()]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  {ok, comment, _T1};
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([59 | Tl]) -> {ok, 59, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(0, infinity, '__alt'(['WSP'(), 'VCHAR'()])),
+                           'CRLF'()]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  {ok, comment, _T1};
+              fail -> fail
+            end
     end.
 
 alternation() ->
     fun (T) ->
-	    __P = '__seq'([concatenation(),
-			   '__repeat'(0, infinity,
-				      '__seq'(['__repeat'(0, infinity, 'c-wsp'()),
-					       fun ([47 | Tl]) -> {ok, 47, Tl};
-						   (_) -> fail
-					       end,
-					       '__repeat'(0, infinity, 'c-wsp'()),
-					       concatenation()]))]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2] = _YY, _T1} ->
-		  try case [Alt || [_, _, _, Alt] <- _YY2] of
-			[] -> _YY1;
-			Alts -> #alt{alts = [_YY1 | Alts]}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([concatenation(),
+                           '__repeat'(0, infinity,
+                                      '__seq'(['__repeat'(0, infinity, 'c-wsp'()),
+                                               fun ([47 | Tl]) -> {ok, 47, Tl};
+                                                   (_) -> fail
+                                               end,
+                                               '__repeat'(0, infinity, 'c-wsp'()),
+                                               concatenation()]))]),
+            case __P(T) of
+              {ok, [_YY1, _YY2] = _YY, _T1} ->
+                  try case [Alt || [_, _, _, Alt] <- _YY2] of
+                        [] -> _YY1;
+                        Alts -> #alt{alts = [_YY1 | Alts]}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 concatenation() ->
     fun (T) ->
-	    __P = '__seq'([repetition(),
-			   '__repeat'(0, infinity,
-				      '__seq'(['__repeat'(1, infinity, 'c-wsp'()),
-					       repetition()]))]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2] = _YY, _T1} ->
-		  try case [Rule || [_, Rule] <- _YY2] of
-			[] -> _YY1;
-			More -> #seq{elements = [_YY1 | More]}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([repetition(),
+                           '__repeat'(0, infinity,
+                                      '__seq'(['__repeat'(1, infinity, 'c-wsp'()),
+                                               repetition()]))]),
+            case __P(T) of
+              {ok, [_YY1, _YY2] = _YY, _T1} ->
+                  try case [Rule || [_, Rule] <- _YY2] of
+                        [] -> _YY1;
+                        More -> #seq{elements = [_YY1 | More]}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 repetition() ->
     fun (T) ->
-	    __P = '__seq'(['__repeat'(0, 1, repeat()), element()]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2] = _YY, _T1} ->
-		  try case _YY1 of
-			[{Min, Max}] ->
-			    #repeat{min = Min, max = Max, body = _YY2};
-			[] -> _YY2
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'(['__repeat'(0, 1, repeat()), element()]),
+            case __P(T) of
+              {ok, [_YY1, _YY2] = _YY, _T1} ->
+                  try case _YY1 of
+                        [{Min, Max}] ->
+                            #repeat{min = Min, max = Max, body = _YY2};
+                        [] -> _YY2
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 repeat() ->
     fun (T) ->
-	    __P = '__alt'(['__seq'(['__repeat'(0, infinity,
-					       'DIGIT'()),
-				    fun ([42 | Tl]) -> {ok, 42, Tl};
-					(_) -> fail
-				    end,
-				    '__repeat'(0, infinity, 'DIGIT'())]),
-			   '__repeat'(1, infinity, 'DIGIT'())]),
-	    case __P(T) of
-	      {ok, _YY, _T1} ->
-		  try case _YY of
-			[[], $*, []] -> {0, infinity};
-			[Min, $*, []] -> {list_to_integer(Min), infinity};
-			[[], $*, Max] -> {0, list_to_integer(Max)};
-			[Min, $*, Max] ->
-			    {list_to_integer(Min), list_to_integer(Max)};
-			Number ->
-			    {list_to_integer(Number), list_to_integer(Number)}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__alt'(['__seq'(['__repeat'(0, infinity,
+                                               'DIGIT'()),
+                                    fun ([42 | Tl]) -> {ok, 42, Tl};
+                                        (_) -> fail
+                                    end,
+                                    '__repeat'(0, infinity, 'DIGIT'())]),
+                           '__repeat'(1, infinity, 'DIGIT'())]),
+            case __P(T) of
+              {ok, _YY, _T1} ->
+                  try case _YY of
+                        [[], $*, []] -> {0, infinity};
+                        [Min, $*, []] -> {list_to_integer(Min), infinity};
+                        [[], $*, Max] -> {0, list_to_integer(Max)};
+                        [Min, $*, Max] ->
+                            {list_to_integer(Min), list_to_integer(Max)};
+                        Number ->
+                            {list_to_integer(Number), list_to_integer(Number)}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 element() ->
     '__alt'([rulename(), group(), option(), 'char-val'(),
-	     'num-val'(), 'prose-val'()]).
+             'num-val'(), 'prose-val'()]).
 
 group() ->
     fun (T) ->
-	    __P = '__seq'([fun ([40 | Tl]) -> {ok, 40, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(0, infinity, 'c-wsp'()), alternation(),
-			   '__repeat'(0, infinity, 'c-wsp'()),
-			   fun ([41 | Tl]) -> {ok, 41, Tl};
-			       (_) -> fail
-			   end]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3, _YY4, _YY5] = _YY, _T1} ->
-		  {ok, _YY3, _T1};
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([40 | Tl]) -> {ok, 40, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(0, infinity, 'c-wsp'()), alternation(),
+                           '__repeat'(0, infinity, 'c-wsp'()),
+                           fun ([41 | Tl]) -> {ok, 41, Tl};
+                               (_) -> fail
+                           end]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3, _YY4, _YY5] = _YY, _T1} ->
+                  {ok, _YY3, _T1};
+              fail -> fail
+            end
     end.
 
 option() ->
     fun (T) ->
-	    __P = '__seq'([fun ([91 | Tl]) -> {ok, 91, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(0, infinity, 'c-wsp'()), alternation(),
-			   '__repeat'(0, infinity, 'c-wsp'()),
-			   fun ([93 | Tl]) -> {ok, 93, Tl};
-			       (_) -> fail
-			   end]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3, _YY4, _YY5] = _YY, _T1} ->
-		  {ok, {repeat, 0, 1, _YY3}, _T1};
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([91 | Tl]) -> {ok, 91, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(0, infinity, 'c-wsp'()), alternation(),
+                           '__repeat'(0, infinity, 'c-wsp'()),
+                           fun ([93 | Tl]) -> {ok, 93, Tl};
+                               (_) -> fail
+                           end]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3, _YY4, _YY5] = _YY, _T1} ->
+                  {ok, {repeat, 0, 1, _YY3}, _T1};
+              fail -> fail
+            end
     end.
 
 'char-val'() ->
     fun (T) ->
-	    __P = '__seq'(['DQUOTE'(),
-			   '__repeat'(0, infinity,
-				      fun ([C | Tl]) when (C >= 35) and (C =< 126) ->
-					      {ok, C, Tl};
-					  ([C | Tl]) when (C >= 32) and (C =< 33) ->
-					      {ok, C, Tl};
-					  (_) -> fail
-				      end),
-			   'DQUOTE'()]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  try F = fun (Char) ->
-				  case {string:to_lower(Char), string:to_upper(Char)} of
-				    {Char, Char} -> #char_val{value = Char};
-				    {Low, Up} ->
-					#char_alt{alts =
-						      [#char_val{value = Low},
-						       #char_val{value = Up}]}
-				  end
-			  end,
-		      case _YY2 of
-			[C] -> F(C);
-			Chars -> #char_seq{elements = [F(C) || C <- Chars]}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'(['DQUOTE'(),
+                           '__repeat'(0, infinity,
+                                      fun ([C | Tl]) when (C >= 35) and (C =< 126) ->
+                                              {ok, C, Tl};
+                                          ([C | Tl]) when (C >= 32) and (C =< 33) ->
+                                              {ok, C, Tl};
+                                          (_) -> fail
+                                      end),
+                           'DQUOTE'()]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  try F = fun (Char) ->
+                                  case {string:to_lower(Char), string:to_upper(Char)} of
+                                    {Char, Char} -> #char_val{value = Char};
+                                    {Low, Up} ->
+                                        #char_alt{alts =
+                                                      [#char_val{value = Low},
+                                                       #char_val{value = Up}]}
+                                  end
+                          end,
+                      case _YY2 of
+                        [C] -> F(C);
+                        Chars -> #char_seq{elements = [F(C) || C <- Chars]}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 'num-val'() ->
     fun (T) ->
-	    __P = '__seq'([fun ([37 | Tl]) -> {ok, 37, Tl};
-			       (_) -> fail
-			   end,
-			   '__alt'(['bin-val'(), 'dec-val'(), 'hex-val'()])]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2] = _YY, _T1} -> {ok, _YY2, _T1};
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([37 | Tl]) -> {ok, 37, Tl};
+                               (_) -> fail
+                           end,
+                           '__alt'(['bin-val'(), 'dec-val'(), 'hex-val'()])]),
+            case __P(T) of
+              {ok, [_YY1, _YY2] = _YY, _T1} -> {ok, _YY2, _T1};
+              fail -> fail
+            end
     end.
 
 'bin-val'() ->
     fun (T) ->
-	    __P = '__seq'([fun ([C | Tl]) when C == 98 ->
-				   {ok, C, Tl};
-			       ([C | Tl]) when C == 66 -> {ok, C, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(1, infinity, 'BIT'()),
-			   '__repeat'(0, 1,
-				      '__alt'(['__repeat'(1, infinity,
-							  '__seq'([fun ([46 | Tl]) ->
-									   {ok, 46, Tl};
-								       (_) -> fail
-								   end,
-								   '__repeat'(1, infinity,
-									      'BIT'())])),
-					       '__seq'([fun ([45 | Tl]) -> {ok, 45, Tl};
-							    (_) -> fail
-							end,
-							'__repeat'(1, infinity,
-								   'BIT'())])]))]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  try First = bin_to_int(_YY2),
-		      case _YY3 of
-			[] -> #char_val{value = First};
-			[[$-, To]] ->
-			    #char_range{from = First, to = bin_to_int(To)};
-			[Vals] ->
-			    #char_seq{elements =
-					  [#char_val{value = First} | [#char_val{value =
-										     bin_to_int(Val)}
-								       || [$., Val] <- Vals]]}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([C | Tl]) when C == 98 ->
+                                   {ok, C, Tl};
+                               ([C | Tl]) when C == 66 -> {ok, C, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(1, infinity, 'BIT'()),
+                           '__repeat'(0, 1,
+                                      '__alt'(['__repeat'(1, infinity,
+                                                          '__seq'([fun ([46 | Tl]) ->
+                                                                           {ok, 46, Tl};
+                                                                       (_) -> fail
+                                                                   end,
+                                                                   '__repeat'(1, infinity,
+                                                                              'BIT'())])),
+                                               '__seq'([fun ([45 | Tl]) -> {ok, 45, Tl};
+                                                            (_) -> fail
+                                                        end,
+                                                        '__repeat'(1, infinity,
+                                                                   'BIT'())])]))]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  try First = bin_to_int(_YY2),
+                      case _YY3 of
+                        [] -> #char_val{value = First};
+                        [[$-, To]] ->
+                            #char_range{from = First, to = bin_to_int(To)};
+                        [Vals] ->
+                            #char_seq{elements =
+                                          [#char_val{value = First} | [#char_val{value =
+                                                                                     bin_to_int(Val)}
+                                                                       || [$., Val] <- Vals]]}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 'dec-val'() ->
     fun (T) ->
-	    __P = '__seq'([fun ([C | Tl]) when C == 100 ->
-				   {ok, C, Tl};
-			       ([C | Tl]) when C == 68 -> {ok, C, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(1, infinity, 'DIGIT'()),
-			   '__repeat'(0, 1,
-				      '__alt'(['__repeat'(1, infinity,
-							  '__seq'([fun ([46 | Tl]) ->
-									   {ok, 46, Tl};
-								       (_) -> fail
-								   end,
-								   '__repeat'(1, infinity,
-									      'DIGIT'())])),
-					       '__seq'([fun ([45 | Tl]) -> {ok, 45, Tl};
-							    (_) -> fail
-							end,
-							'__repeat'(1, infinity,
-								   'DIGIT'())])]))]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  try First = list_to_integer(_YY2),
-		      case _YY3 of
-			[] -> #char_val{value = First};
-			[[$-, To]] ->
-			    #char_range{from = First, to = list_to_integer(To)};
-			[Vals] ->
-			    #char_seq{elements =
-					  [#char_val{value = First} | [#char_val{value =
-										     list_to_integer(Val)}
-								       || [$., Val] <- Vals]]}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([C | Tl]) when C == 100 ->
+                                   {ok, C, Tl};
+                               ([C | Tl]) when C == 68 -> {ok, C, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(1, infinity, 'DIGIT'()),
+                           '__repeat'(0, 1,
+                                      '__alt'(['__repeat'(1, infinity,
+                                                          '__seq'([fun ([46 | Tl]) ->
+                                                                           {ok, 46, Tl};
+                                                                       (_) -> fail
+                                                                   end,
+                                                                   '__repeat'(1, infinity,
+                                                                              'DIGIT'())])),
+                                               '__seq'([fun ([45 | Tl]) -> {ok, 45, Tl};
+                                                            (_) -> fail
+                                                        end,
+                                                        '__repeat'(1, infinity,
+                                                                   'DIGIT'())])]))]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  try First = list_to_integer(_YY2),
+                      case _YY3 of
+                        [] -> #char_val{value = First};
+                        [[$-, To]] ->
+                            #char_range{from = First, to = list_to_integer(To)};
+                        [Vals] ->
+                            #char_seq{elements =
+                                          [#char_val{value = First} | [#char_val{value =
+                                                                                     list_to_integer(Val)}
+                                                                       || [$., Val] <- Vals]]}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 'hex-val'() ->
     fun (T) ->
-	    __P = '__seq'([fun ([C | Tl]) when C == 120 ->
-				   {ok, C, Tl};
-			       ([C | Tl]) when C == 88 -> {ok, C, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(1, infinity, 'HEXDIG'()),
-			   '__repeat'(0, 1,
-				      '__alt'(['__repeat'(1, infinity,
-							  '__seq'([fun ([46 | Tl]) ->
-									   {ok, 46, Tl};
-								       (_) -> fail
-								   end,
-								   '__repeat'(1, infinity,
-									      'HEXDIG'())])),
-					       '__seq'([fun ([45 | Tl]) -> {ok, 45, Tl};
-							    (_) -> fail
-							end,
-							'__repeat'(1, infinity,
-								   'HEXDIG'())])]))]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  try First = hex_to_int(_YY2),
-		      case _YY3 of
-			[] -> #char_val{value = First};
-			[[$-, To]] ->
-			    #char_range{from = First, to = hex_to_int(To)};
-			[Vals] ->
-			    #char_seq{elements =
-					  [#char_val{value = First} | [#char_val{value =
-										     hex_to_int(Val)}
-								       || [$., Val] <- Vals]]}
-		      end
-		  of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([C | Tl]) when C == 120 ->
+                                   {ok, C, Tl};
+                               ([C | Tl]) when C == 88 -> {ok, C, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(1, infinity, 'HEXDIG'()),
+                           '__repeat'(0, 1,
+                                      '__alt'(['__repeat'(1, infinity,
+                                                          '__seq'([fun ([46 | Tl]) ->
+                                                                           {ok, 46, Tl};
+                                                                       (_) -> fail
+                                                                   end,
+                                                                   '__repeat'(1, infinity,
+                                                                              'HEXDIG'())])),
+                                               '__seq'([fun ([45 | Tl]) -> {ok, 45, Tl};
+                                                            (_) -> fail
+                                                        end,
+                                                        '__repeat'(1, infinity,
+                                                                   'HEXDIG'())])]))]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  try First = hex_to_int(_YY2),
+                      case _YY3 of
+                        [] -> #char_val{value = First};
+                        [[$-, To]] ->
+                            #char_range{from = First, to = hex_to_int(To)};
+                        [Vals] ->
+                            #char_seq{elements =
+                                          [#char_val{value = First} | [#char_val{value =
+                                                                                     hex_to_int(Val)}
+                                                                       || [$., Val] <- Vals]]}
+                      end
+                  of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 'prose-val'() ->
     fun (T) ->
-	    __P = '__seq'([fun ([60 | Tl]) -> {ok, 60, Tl};
-			       (_) -> fail
-			   end,
-			   '__repeat'(0, infinity,
-				      fun ([C | Tl]) when (C >= 63) and (C =< 126) ->
-					      {ok, C, Tl};
-					  ([C | Tl]) when (C >= 32) and (C =< 61) ->
-					      {ok, C, Tl};
-					  (_) -> fail
-				      end),
-			   fun ([62 | Tl]) -> {ok, 62, Tl};
-			       (_) -> fail
-			   end]),
-	    case __P(T) of
-	      {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
-		  try {'prose-val', lists:flatten(_YY2)} of
-		    __Ret -> {ok, __Ret, _T1}
-		  catch
-		    fail -> fail
-		  end;
-	      fail -> fail
-	    end
+            __P = '__seq'([fun ([60 | Tl]) -> {ok, 60, Tl};
+                               (_) -> fail
+                           end,
+                           '__repeat'(0, infinity,
+                                      fun ([C | Tl]) when (C >= 63) and (C =< 126) ->
+                                              {ok, C, Tl};
+                                          ([C | Tl]) when (C >= 32) and (C =< 61) ->
+                                              {ok, C, Tl};
+                                          (_) -> fail
+                                      end),
+                           fun ([62 | Tl]) -> {ok, 62, Tl};
+                               (_) -> fail
+                           end]),
+            case __P(T) of
+              {ok, [_YY1, _YY2, _YY3] = _YY, _T1} ->
+                  try {'prose-val', lists:flatten(_YY2)} of
+                    __Ret -> {ok, __Ret, _T1}
+                  catch
+                    fail -> fail
+                  end;
+              fail -> fail
+            end
     end.
 
 '__alt'(Ps) -> fun (T) -> '__do_alt'(Ps, T) end.
@@ -523,11 +523,11 @@ option() ->
     case P(T) of
       {ok, R1, T1} when Max == Found + 1 -> {ok, [R1], T1};
       {ok, R1, T1} ->
-	  case '__do_repeat'(Min, Max, P, Found + 1, T1) of
-	    {ok, R2, T2} -> {ok, [R1 | R2], T2};
-	    fail when Found >= Min -> {ok, [R1], T1};
-	    fail -> fail
-	  end;
+          case '__do_repeat'(Min, Max, P, Found + 1, T1) of
+            {ok, R2, T2} -> {ok, [R1 | R2], T2};
+            fail when Found >= Min -> {ok, [R1], T1};
+            fail -> fail
+          end;
       fail when Found >= Min -> {ok, [], T};
       fail -> fail
     end.
@@ -537,10 +537,10 @@ option() ->
 '__do_seq'([P | Ps], T) ->
     case P(T) of
       {ok, R1, T1} ->
-	  case '__do_seq'(Ps, T1) of
-	    {ok, R2, T2} -> {ok, [R1 | R2], T2};
-	    fail -> fail
-	  end;
+          case '__do_seq'(Ps, T1) of
+            {ok, R2, T2} -> {ok, [R1 | R2], T2};
+            fail -> fail
+          end;
       fail -> fail
     end;
 '__do_seq'([], T) -> {ok, [], T}.

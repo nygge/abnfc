@@ -1,19 +1,19 @@
-rulelist       =  1*( rule/ (*c-wsp c-nl)) : 
+rulelist       =  1*( rule/ (*c-wsp c-nl)) :
     #rulelist{rules=[Rule || Rule <- _YY, is_tuple(Rule)]}.
 
 rule           =  rulename defined-as elements [*WSP ":" *WSP erlangcode] c-nl :
-    #rule{type=_YY2, name=element(2,_YY1), body=_YY3, 
+    #rule{type=_YY2, name=element(2,_YY1), body=_YY3,
           code=case _YY4 of
                    [[_,_,_,Code]] -> Code;
-                   [] -> nocode 
+                   [] -> nocode
                end}.
 
-rulename       =  ALPHA *(ALPHA/ DIGIT/ "-") : 
+rulename       =  ALPHA *(ALPHA/ DIGIT/ "-") :
     #rulename{name=list_to_atom(lists:flatten(_YY))}.
 
-defined-as     =  *c-wsp ("="/ "=/") *c-wsp : 
+defined-as     =  *c-wsp ("="/ "=/") *c-wsp :
     case _YY2 of
-	$= -> def_rule;
+        $= -> def_rule;
         _ -> app_rule
     end.
 
@@ -34,21 +34,21 @@ alternation    =  concatenation *(*c-wsp "/" *c-wsp concatenation) :
 concatenation  =  repetition *(1*c-wsp repetition) :
     case [Rule || [_,Rule] <- _YY2] of
         [] -> _YY1;
-        More ->	#seq{elements=[_YY1 | More]}
+        More -> #seq{elements=[_YY1 | More]}
     end.
 
-repetition     =  [repeat] element : 
+repetition     =  [repeat] element :
     case _YY1 of
         [{Min,Max}] -> #repeat{min=Min,max=Max,body=_YY2};
-	[] -> _YY2
-    end. 
+        [] -> _YY2
+    end.
 
-repeat         =  (*DIGIT "*" *DIGIT)/ 1*DIGIT : 
+repeat         =  (*DIGIT "*" *DIGIT)/ 1*DIGIT :
     case _YY of
         [[],$*,[]] -> {0, infinity};
-	[Min, $*, []] -> {list_to_integer(Min), infinity};
-	[[], $*, Max] -> {0, list_to_integer(Max)};
-	[Min, $*, Max] -> {list_to_integer(Min), list_to_integer(Max)};
+        [Min, $*, []] -> {list_to_integer(Min), infinity};
+        [[], $*, Max] -> {0, list_to_integer(Max)};
+        [Min, $*, Max] -> {list_to_integer(Min), list_to_integer(Max)};
         Number -> {list_to_integer(Number), list_to_integer(Number)}
     end.
 
@@ -56,10 +56,10 @@ element        =  rulename/ group/ option/ char-val/ num-val/ prose-val
 
 group          =  "(" *c-wsp alternation *c-wsp ")" : _YY3.
 
-option         =  "[" *c-wsp alternation *c-wsp "]" : 
+option         =  "[" *c-wsp alternation *c-wsp "]" :
     {repeat, 0, 1, _YY3}.
 
-char-val       =  DQUOTE *(%x20-21/ %x23-7E) DQUOTE : 
+char-val       =  DQUOTE *(%x20-21/ %x23-7E) DQUOTE :
     F = fun (Char) ->
                   case {string:to_lower(Char),string:to_upper(Char)} of
                       {Char,Char} -> #char_val{value=Char};
@@ -99,6 +99,5 @@ hex-val        =  "x" 1*HEXDIG [ 1*("." 1*HEXDIG)/ ("-" 1*HEXDIG)] :
     end.
 
 
-prose-val      =  "<" *(%x20-3D/ %x3F-7E) ">" : 
+prose-val      =  "<" *(%x20-3D/ %x3F-7E) ">" :
     {'prose-val', lists:flatten(_YY2)}.
-

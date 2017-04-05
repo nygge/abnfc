@@ -29,4 +29,3 @@ SP             =  %x20
 VCHAR          =  %x21-7E
 
 WSP            =  SP/ HTAB
-

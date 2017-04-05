@@ -5,9 +5,9 @@
 -module(rfc4234_core).
 
 -export(['ALPHA'/0, 'BIT'/0, 'CHAR'/0, 'CR'/0, 'CRLF'/0,
-	 'CTL'/0, 'DIGIT'/0, 'DQUOTE'/0, 'HEXDIG'/0, 'HTAB'/0,
-	 'LF'/0, 'LWSP'/0, 'OCTET'/0, 'SP'/0, 'VCHAR'/0, 'WSP'/0,
-	 decode/2]).
+         'CTL'/0, 'DIGIT'/0, 'DQUOTE'/0, 'HEXDIG'/0, 'HTAB'/0,
+         'LF'/0, 'LWSP'/0, 'OCTET'/0, 'SP'/0, 'VCHAR'/0, 'WSP'/0,
+         decode/2]).
 
 -include("rfc4234_core.hrl").
 
@@ -30,26 +30,26 @@ decode('WSP', Str) -> ('WSP'())(Str).
 
 'ALPHA'() ->
     fun ([C | Tl]) when (C >= 65) and (C =< 90) ->
-	    {ok, C, Tl};
-	([C | Tl]) when (C >= 97) and (C =< 122) -> {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        ([C | Tl]) when (C >= 97) and (C =< 122) -> {ok, C, Tl};
+        (_) -> fail
     end.
 
 'BIT'() ->
     fun ([C | Tl]) when (C >= 48) and (C =< 49) ->
-	    {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        (_) -> fail
     end.
 
 'CHAR'() ->
     fun ([C | Tl]) when (C >= 1) and (C =< 127) ->
-	    {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        (_) -> fail
     end.
 
 'CR'() ->
     fun ([13 | Tl]) -> {ok, 13, Tl};
-	(_) -> fail
+        (_) -> fail
     end.
 
 'CRLF'() ->
@@ -57,78 +57,78 @@ decode('WSP', Str) -> ('WSP'())(Str).
 
 'CTL'() ->
     fun ([C | Tl]) when (C >= 0) and (C =< 31) ->
-	    {ok, C, Tl};
-	([C | Tl]) when C == 127 -> {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        ([C | Tl]) when C == 127 -> {ok, C, Tl};
+        (_) -> fail
     end.
 
 'DIGIT'() ->
     fun ([C | Tl]) when (C >= 48) and (C =< 57) ->
-	    {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        (_) -> fail
     end.
 
 'DQUOTE'() ->
     fun ([34 | Tl]) -> {ok, 34, Tl};
-	(_) -> fail
+        (_) -> fail
     end.
 
 'HEXDIG'() ->
     '__alt'(['DIGIT'(),
-	     fun ([C | Tl]) when C == 97 -> {ok, C, Tl};
-		 ([C | Tl]) when C == 65 -> {ok, C, Tl};
-		 (_) -> fail
-	     end,
-	     fun ([C | Tl]) when C == 98 -> {ok, C, Tl};
-		 ([C | Tl]) when C == 66 -> {ok, C, Tl};
-		 (_) -> fail
-	     end,
-	     fun ([C | Tl]) when C == 99 -> {ok, C, Tl};
-		 ([C | Tl]) when C == 67 -> {ok, C, Tl};
-		 (_) -> fail
-	     end,
-	     fun ([C | Tl]) when C == 100 -> {ok, C, Tl};
-		 ([C | Tl]) when C == 68 -> {ok, C, Tl};
-		 (_) -> fail
-	     end,
-	     fun ([C | Tl]) when C == 101 -> {ok, C, Tl};
-		 ([C | Tl]) when C == 69 -> {ok, C, Tl};
-		 (_) -> fail
-	     end,
-	     fun ([C | Tl]) when C == 102 -> {ok, C, Tl};
-		 ([C | Tl]) when C == 70 -> {ok, C, Tl};
-		 (_) -> fail
-	     end]).
+             fun ([C | Tl]) when C == 97 -> {ok, C, Tl};
+                 ([C | Tl]) when C == 65 -> {ok, C, Tl};
+                 (_) -> fail
+             end,
+             fun ([C | Tl]) when C == 98 -> {ok, C, Tl};
+                 ([C | Tl]) when C == 66 -> {ok, C, Tl};
+                 (_) -> fail
+             end,
+             fun ([C | Tl]) when C == 99 -> {ok, C, Tl};
+                 ([C | Tl]) when C == 67 -> {ok, C, Tl};
+                 (_) -> fail
+             end,
+             fun ([C | Tl]) when C == 100 -> {ok, C, Tl};
+                 ([C | Tl]) when C == 68 -> {ok, C, Tl};
+                 (_) -> fail
+             end,
+             fun ([C | Tl]) when C == 101 -> {ok, C, Tl};
+                 ([C | Tl]) when C == 69 -> {ok, C, Tl};
+                 (_) -> fail
+             end,
+             fun ([C | Tl]) when C == 102 -> {ok, C, Tl};
+                 ([C | Tl]) when C == 70 -> {ok, C, Tl};
+                 (_) -> fail
+             end]).
 
 'HTAB'() ->
     fun ([9 | Tl]) -> {ok, 9, Tl};
-	(_) -> fail
+        (_) -> fail
     end.
 
 'LF'() ->
     fun ([10 | Tl]) -> {ok, 10, Tl};
-	(_) -> fail
+        (_) -> fail
     end.
 
 'LWSP'() ->
     '__repeat'(0, infinity,
-	       '__alt'(['WSP'(), '__seq'(['CRLF'(), 'WSP'()])])).
+               '__alt'(['WSP'(), '__seq'(['CRLF'(), 'WSP'()])])).
 
 'OCTET'() ->
     fun ([C | Tl]) when (C >= 0) and (C =< 255) ->
-	    {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        (_) -> fail
     end.
 
 'SP'() ->
     fun ([32 | Tl]) -> {ok, 32, Tl};
-	(_) -> fail
+        (_) -> fail
     end.
 
 'VCHAR'() ->
     fun ([C | Tl]) when (C >= 33) and (C =< 126) ->
-	    {ok, C, Tl};
-	(_) -> fail
+            {ok, C, Tl};
+        (_) -> fail
     end.
 
 'WSP'() -> '__alt'(['SP'(), 'HTAB'()]).
@@ -149,13 +149,12 @@ decode('WSP', Str) -> ('WSP'())(Str).
 
 '__do_repeat'(Min, Max, P, Found, T) ->
     case P(T) of
-      {ok, R1, T1} when Max == Found + 1 -> {ok, [R1], T1};
       {ok, R1, T1} ->
-	  case '__do_repeat'(Min, Max, P, Found + 1, T1) of
-	    {ok, R2, T2} -> {ok, [R1 | R2], T2};
-	    fail when Found >= Min -> {ok, [R1], T1};
-	    fail -> fail
-	  end;
+          case '__do_repeat'(Min, Max, P, Found + 1, T1) of
+            {ok, R2, T2} -> {ok, [R1 | R2], T2};
+            fail when Found >= Min -> {ok, [R1], T1};
+            fail -> fail
+          end;
       fail when Found >= Min -> {ok, [], T};
       fail -> fail
     end.
@@ -165,10 +164,10 @@ decode('WSP', Str) -> ('WSP'())(Str).
 '__do_seq'([P | Ps], T) ->
     case P(T) of
       {ok, R1, T1} ->
-	  case '__do_seq'(Ps, T1) of
-	    {ok, R2, T2} -> {ok, [R1 | R2], T2};
-	    fail -> fail
-	  end;
+          case '__do_seq'(Ps, T1) of
+            {ok, R2, T2} -> {ok, [R1 | R2], T2};
+            fail -> fail
+          end;
       fail -> fail
     end;
 '__do_seq'([], T) -> {ok, [], T}.
