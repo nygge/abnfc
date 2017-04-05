@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
 %%% @copyright 2009 Anders Nygren
-%%% @version  {@vsn} 
+%%% @version  {@vsn}
 %%% @author Anders Nygren <anders.nygren@gmail.com>
-%%% @doc 
-%%% @end 
+%%% @doc
+%%% @end
 %%%-------------------------------------------------------------------
 -module(abnfc_ast).
 
@@ -11,7 +11,7 @@
 %%-export([transform/2]).
 -compile(export_all).
 
--include("abnfc_ast.hrl").
+-include("../include/abnfc_ast.hrl").
 
 %%====================================================================
 %% API
@@ -37,10 +37,10 @@ transform(#rule{body=Body}=R) ->
 transform(#alt{alts=Alts}=A) ->
     Alts1 = [transform(Alt)||Alt <- Alts],
     case char_alts(Alts1) of
-	[C] when is_record(C,char_alt) ->
-	    C;
-	Alts2 ->
-	    A#alt{alts=Alts2}
+        [C] when is_record(C,char_alt) ->
+            C;
+        Alts2 ->
+            A#alt{alts=Alts2}
     end;
 transform(#seq{elements=Elems}=S) ->
     Elems1 = [transform(Elem)||Elem <- Elems],
@@ -54,7 +54,7 @@ char_alts(Alts) ->
     char_alts(Alts, {[],[]}).
 
 char_alts([Alt|Alts], {Chars,Others}) when is_record(Alt, char_val);
-					   is_record(Alt, char_range) ->
+                                           is_record(Alt, char_range) ->
     char_alts(Alts,{Chars++[Alt], Others});
 char_alts([Alt|Alts], {Chars,Others}) ->
     char_alts(Alts,{Chars, Others++[Alt]});

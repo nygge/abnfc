@@ -2,8 +2,7 @@
 {application, abnfc,
  [{description,"ABNF parser generator"},
   {vsn,"0.3"},
-  {modules, "MODULES"},
+  {modules, []},
   {applications,[kernel,stdlib]},
-  {registered,[]},
   {env,[]}
  ]}.

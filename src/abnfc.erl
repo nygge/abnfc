@@ -1,15 +1,15 @@
 %%%-------------------------------------------------------------------
 %%% @copyright 2009 Anders Nygren
-%%% @version  {@vsn} 
+%%% @version  {@vsn}
 %%% @author Anders Nygren <anders.nygren@gmail.com>
-%%% @doc 
-%%% @end 
+%%% @doc
+%%% @end
 %%%-------------------------------------------------------------------
 -module(abnfc).
 
 %% API
 -export([file/1, file/2,
-	 parse/1, parse/2]).
+         parse/1, parse/2]).
 
 -export([erlangcode/0]).
 
@@ -34,27 +34,18 @@ file(File) ->
 %% @end
 %%--------------------------------------------------------------------
 file(File, Opts) when is_list(Opts) ->
-    case read_file(File) of
-	{ok, Name, Text} ->
-	    POpts = [],
-	    GenOpts = gen_opts(Name, Opts),
-	    COpts = compiler_opts(Opts),
-	    case parse(Text, POpts) of
-		{ok, AST, _Rest} ->
-		    AST1 = abnfc_ast:ast_to_int_form(AST),
-		    case proplists:get_bool(verbose,Opts) of
-			true -> io:format("~p~n",[AST1]);
-			false -> ok
-		    end,
-		    {ok, Code} = abnfc_gen:generate(AST1, GenOpts),
-		    {ok, GenFile} = write_file(Code, GenOpts ++ Opts),
-		    compile_file(GenFile, COpts, Opts);
-		Error ->
-		    Error
-	    end;
-	Error ->
-	    Error
-    end.
+    {ok, Name, Text} = read_file(File),
+    GenOpts = gen_opts(Name, Opts),
+    COpts = compiler_opts(Opts),
+    {ok, AST, []} = parse(Text, []),
+    AST1 = abnfc_ast:ast_to_int_form(AST),
+    case proplists:get_bool(verbose,Opts) of
+        true -> io:format("~p~n",[AST1]);
+        false -> ok
+    end,
+    {ok, Code} = abnfc_gen:generate(AST1, GenOpts),
+    {ok, GenFile} = write_file(Code, GenOpts ++ Opts),
+    compile_file(GenFile, COpts, Opts).
 
 %%--------------------------------------------------------------------
 %% @spec (Text) -> {ok, AST, Rest::binary()} | fail
@@ -84,36 +75,36 @@ parse(String, _Opts) when is_list(String) ->
 %%--------------------------------------------------------------------
 erlangcode() ->
     fun (T) ->
-	    scan(T)
+            scan(T)
     end.
 
 scan(Input) ->
     case erl_scan:tokens([], Input, 1) of
-	{done, {ok, Toks, _EndLine}, Extra} ->
-	    {ok,Abs} = erl_parse:parse_exprs(Toks),
-	    {ok, Abs, Extra};
-	{more, _Cont} ->
-	    throw(end_of_input)
+        {done, {ok, Toks, _EndLine}, Extra} ->
+            {ok,Abs} = erl_parse:parse_exprs(Toks),
+            {ok, Abs, Extra};
+        {more, _Cont} ->
+            throw(end_of_input)
     end.
 
 %%--------------------------------------------------------------------
-%% @private 
+%% @private
 %% @spec (Tokens) -> list()
 %% @doc Convert tokens returned by erl_scan to a string again.
 %% @end
 %%--------------------------------------------------------------------
 toks_to_list(Tokens) ->
     lists:foldl(fun({atom,L,Name},{Line, Acc}) ->
-			{L,["'",Name,"'",sep(L,Line)|Acc]};
-		   ({string,L,Name},{Line, Acc}) ->
-			{L,["\"",Name,"\"",sep(L,Line)|Acc]};
-		   ({_Type,L,Name},{Line, Acc}) ->
-			{L,[Name,sep(L,Line)|Acc]};
-		   ({dot,_L},{_Line,Acc}) ->
-			lists:concat(lists:reverse(Acc));
-		   ({Reserved, L},{Line,Acc}) ->
-			{L,[Reserved,sep(L,Line)|Acc]}
-		end, {1,[]}, Tokens).
+                        {L,["'",Name,"'",sep(L,Line)|Acc]};
+                   ({string,L,Name},{Line, Acc}) ->
+                        {L,["\"",Name,"\"",sep(L,Line)|Acc]};
+                   ({_Type,L,Name},{Line, Acc}) ->
+                        {L,[Name,sep(L,Line)|Acc]};
+                   ({dot,_L},{_Line,Acc}) ->
+                        lists:concat(lists:reverse(Acc));
+                   ({Reserved, L},{Line,Acc}) ->
+                        {L,[Reserved,sep(L,Line)|Acc]}
+                end, {1,[]}, Tokens).
 
 sep(L,L) ->
     " ";
@@ -125,23 +116,23 @@ sep(_,_) ->
 %%====================================================================
 read_file(File) ->
     case string:tokens(filename:basename(File), ".") of
-	[Name,"set","abnf"] ->
-	    {ok, Files} = file:consult(File),
-	    {ok, Name, lists:flatten([read_file1(F) || F <- Files])};
-	[Name, "abnf"] ->
-	    {ok, Name, read_file1(File)}
+        [Name,"set","abnf"] ->
+            {ok, Files} = file:consult(File),
+            {ok, Name, lists:flatten([read_file1(F) || F <- Files])};
+        [Name, "abnf"] ->
+            {ok, Name, read_file1(File)}
     end.
 
 read_file1(File) ->
     {ok, Bin} = file:read_file(File),
     binary_to_list(Bin).
-    
+
 gen_opts(Name, Opts) ->
     Mod = proplists:get_value(mod, Opts, Name),
     Type = case proplists:get_bool(binary, Opts) of
-	       true -> binary;
-	       false -> list
-	   end,
+               true -> binary;
+               false -> list
+           end,
     Verbose = proplists:get_bool(verbose,Opts),
     [{mod,Mod},{verbose,Verbose},Type].
 
@@ -149,11 +140,11 @@ compiler_opts(Opts) ->
     OutDir = proplists:get_value(o, Opts, "./"),
     IncludeDirs = [{i,Dir}||Dir <- proplists:get_all_values(i, Opts)],
     [report,{outdir,OutDir}|IncludeDirs].
-    
+
 write_file(Code, Opts) ->
     Name = filename:join(proplists:get_value(o, Opts, "."),
-			 proplists:get_value(mod, Opts))++".erl",
-    
+                         proplists:get_value(mod, Opts))++".erl",
+
     maybe_write("abnfc: writing to ~p~n",[Name],Opts),
     file:write_file(Name, Code),
     erl_tidy:file(Name,[{paper, 95},{backups,false}]),
@@ -162,12 +153,12 @@ write_file(Code, Opts) ->
 compile_file(File, COpts, MyOpts) ->
     maybe_write("abnfc: compiling ~p opts = ~p~n",[File, COpts],MyOpts),
     case proplists:get_bool(noobj,MyOpts) of
-	true -> ok;
-	false -> compile:file(File, COpts)
+        true -> ok;
+        false -> compile:file(File, COpts)
     end.
 
 maybe_write(Fmt,Args,Opts) ->
     case proplists:get_bool(verbose,Opts) of
-	true -> io:format(Fmt,Args);
-	false -> ok
+        true -> io:format(Fmt,Args);
+        false -> ok
     end.
