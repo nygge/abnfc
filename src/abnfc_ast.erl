@@ -8,8 +8,10 @@
 -module(abnfc_ast).
 
 %% API
-%%-export([transform/2]).
--compile(export_all).
+-export(
+   [ast_to_int_form/1,
+    int_transform/2
+   ]).
 
 -include("../include/abnfc_ast.hrl").
 
@@ -23,7 +25,6 @@
 %%--------------------------------------------------------------------
 ast_to_int_form(#rulelist{rules=Rules}) ->
     [R#rule{body=transform(R#rule.body)}||R <- Rules].
-
 
 int_transform(INT, Fun) ->
     [R#rule{body=Fun(R#rule.body)} || R <- INT].

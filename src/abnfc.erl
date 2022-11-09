@@ -13,7 +13,6 @@
 
 -export([erlangcode/0]).
 
--compile(export_all).
 %%====================================================================
 %% API
 %%====================================================================
@@ -87,31 +86,6 @@ scan(Input) ->
             throw(end_of_input)
     end.
 
-%%--------------------------------------------------------------------
-%% @private
-%% @spec (Tokens) -> list()
-%% @doc Convert tokens returned by erl_scan to a string again.
-%% @end
-%%--------------------------------------------------------------------
-toks_to_list(Tokens) ->
-    lists:foldl(fun({atom,L,Name},{Line, Acc}) ->
-                        {L,["'",Name,"'",sep(L,Line)|Acc]};
-                   ({string,L,Name},{Line, Acc}) ->
-                        {L,["\"",Name,"\"",sep(L,Line)|Acc]};
-                   ({_Type,L,Name},{Line, Acc}) ->
-                        {L,[Name,sep(L,Line)|Acc]};
-                   ({dot,_L},{_Line,Acc}) ->
-                        lists:concat(lists:reverse(Acc));
-                   ({Reserved, L},{Line,Acc}) ->
-                        {L,[Reserved,sep(L,Line)|Acc]}
-                end, {1,[]}, Tokens).
-
-sep(L,L) ->
-    " ";
-sep(_,_) ->
-    "\n".
-
-%%====================================================================
 %% Internal functions
 %%====================================================================
 read_file(File) ->
